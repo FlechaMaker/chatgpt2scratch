@@ -50,7 +50,7 @@ const I18n = {
         setApiKeyBlockDefaultValue:
             'API key',
         setApiKeyFuncPromptText:
-            'Enter the API key.',
+            'Enter the API key [TEXT]',
         answerFuncFailedToGetAnswer:
             'Failed to get answer',
     },
@@ -70,7 +70,7 @@ const I18n = {
         setTimeoutBlockText:
             'timeout を設定 [NUMBER]',
         setApiKeyBlockText:
-            'APIキーをセット',
+            'APIキーをセット [TEXT]',
         setApiKeyBlockDefaultValue:
             'API キー',
         setApiKeyFuncPromptText:
@@ -95,7 +95,7 @@ const I18n = {
         setTimeoutBlockText:
             'タイムアウトをせってい [NUMBER]',
         setApiKeyBlockText:
-            'エーピーアイキーをセット',
+            'エーピーアイキーをセット [TEXT]',
         setApiKeyBlockDefaultValue:
             'エーピーアイキー',
         setApiKeyFuncPromptText:
@@ -206,6 +206,12 @@ class Scratch3ChatGPTBlocks {
                     opcode: 'setApiKey',
                     blockType: BlockType.COMMAND,
                     text: this.i18n.setApiKeyBlockText,
+                    arguments: {
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+                        },
+                    },
                 },
             ],
         };
@@ -263,8 +269,8 @@ class Scratch3ChatGPTBlocks {
         this._initMessageLog();
     }
 
-    setApiKey() {
-        this.apiKey = window.prompt(this.i18n.setApiKeyFuncPromptText);
+    setApiKey(args) {
+        this.apiKey = String(args.TEXT);
         window.sessionStorage.setItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY, this.apiKey);
     }
 

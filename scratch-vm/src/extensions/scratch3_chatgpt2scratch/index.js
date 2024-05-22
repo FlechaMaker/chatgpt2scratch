@@ -1,7 +1,7 @@
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const Cast = require('../../util/cast');
-const { fetchWithTimeout } = require('../../util/fetch-with-timeout');
+const fetchWithTimeout = require('../../util/fetch-with-timeout');
 const log = require('../../util/log');
 const formatMessage = require('format-message');
 
@@ -106,12 +106,17 @@ const I18n = {
 }
 
 /**
+ * Session key for storing the ChatGPT API key.
+ * @type {string}
+ */
+const SESSION_STORAGE_KEY_CHATGPT_API_KEY = 'chatGptApiKey';
+
+/*
  * Class for the new blocks in Scratch 3.0
  * @param {Runtime} runtime - the runtime instantiating this block package.
  * @constructor
  */
 class Scratch3ChatGPTBlocks {
-    SESSION_STORAGE_KEY_CHATGPT_API_KEY = 'chatGptApiKey'
 
     constructor(runtime) {
         /**
@@ -119,7 +124,7 @@ class Scratch3ChatGPTBlocks {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.apiKey = window.sessionStorage.getItem(this.SESSION_STORAGE_KEY_CHATGPT_API_KEY) || '';
+        this.apiKey = window.sessionStorage.getItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY || '');
         this.maxTokens = 300;
         this.temperature = 1;
         this.timeout = 30000;
@@ -232,6 +237,7 @@ class Scratch3ChatGPTBlocks {
                 temperature: this.temperature,
             })
         }
+        console.log(fetchWithTimeout);
         const completionPromise = fetchWithTimeout('https://api.openai.com/v1/chat/completions', params, this.timeout)
             .then(response => response.json()
             ).then(json => {
@@ -259,7 +265,7 @@ class Scratch3ChatGPTBlocks {
 
     setApiKey() {
         this.apiKey = window.prompt(this.i18n.setApiKeyFuncPromptText);
-        window.sessionStorage.setItem(this.SESSION_STORAGE_KEY_CHATGPT_API_KEY, this.apiKey);
+        window.sessionStorage.setItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY, this.apiKey);
     }
 
     setMaxTokens(args) {

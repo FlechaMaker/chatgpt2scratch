@@ -21,8 +21,7 @@ const blockIconURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYA
  * setMaxTokensBlockText: string,
  * setTemperatureBlockText: string,
  * setApiKeyBlockText: string,
- * setApiKeyBlockDefaultValue: string,
- * setApiKeyFuncPromptText: string,
+ * setModelBlockText: string,
  * answerFuncFailedToGetAnswer: string }} I18nData
  */
 
@@ -39,18 +38,16 @@ const I18n = {
             'Enter the API key obtained from the openai.com site',
         clearMessageLogsBlockText:
             'Clear message logs',
+        setModelBlockText:
+            'Set model [MODEL]',
         setMaxTokensBlockText:
             'Set max tokens [NUMBER]',
-        setApiKeyBlockText:
-            'Set API key',
         setTemperatureBlockText:
             'Set temperature (0-2) [NUMBER]',
         setTimeoutBlockText:
             'Set timeout [NUMBER]',
-        setApiKeyBlockDefaultValue:
-            'API key',
-        setApiKeyFuncPromptText:
-            'Enter the API key [TEXT]',
+        setApiKeyBlockText:
+            'Set API key [TEXT]',
         answerFuncFailedToGetAnswer:
             'Failed to get answer',
     },
@@ -63,6 +60,8 @@ const I18n = {
             'openai.com のサイトからAPIキーを取得してセットください',
         clearMessageLogsBlockText:
             'メッセージログをクリア',
+        setModelBlockText:
+            'モデルを設定 [MODEL]',
         setMaxTokensBlockText:
             '最大トークン数を設定[NUMBER]',
         setTemperatureBlockText:
@@ -71,10 +70,6 @@ const I18n = {
             'timeout を設定 [NUMBER]',
         setApiKeyBlockText:
             'APIキーをセット [TEXT]',
-        setApiKeyBlockDefaultValue:
-            'API キー',
-        setApiKeyFuncPromptText:
-            'APIキーを入力してください',
         answerFuncFailedToGetAnswer:
             '答えを取得できませんでした',
 
@@ -88,6 +83,8 @@ const I18n = {
             'オープンエーアイエーアイキーをにゅうりょくしてください',
         clearMessageLogsBlockText:
             'メッセージログをクリア',
+        setModelBlockText:
+            'モデルをせってい [MODEL]',
         setMaxTokensBlockText:
             'さいだいトークンすうをせってい[NUMBER]',
         setTemperatureBlockText:
@@ -96,10 +93,6 @@ const I18n = {
             'タイムアウトをせってい [NUMBER]',
         setApiKeyBlockText:
             'エーピーアイキーをセット [TEXT]',
-        setApiKeyBlockDefaultValue:
-            'エーピーアイキー',
-        setApiKeyFuncPromptText:
-            'エーピーアイキーをにゅうりょくしてください',
         answerFuncFailedToGetAnswer:
             'こたえをしゅとくできませんでした'
     }
@@ -125,6 +118,7 @@ class Scratch3ChatGPTBlocks {
          */
         this.runtime = runtime;
         this.apiKey = window.sessionStorage.getItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY || '');
+        this.model = 'gpt-4o';
         this.maxTokens = 300;
         this.temperature = 1;
         this.timeout = 30000;
@@ -168,6 +162,18 @@ class Scratch3ChatGPTBlocks {
                     blockType: BlockType.COMMAND,
                     text: this.i18n.clearMessageLogsBlockText,
 
+                },
+                {
+                    opcode: 'setModel',
+                    blockType: BlockType.COMMAND,
+                    text: this.i18n.setModelBlockText,
+                    arguments: {
+                        MODEL: {
+                            type: ArgumentType.STRING,
+                            menu: 'chat_models',
+                            defaultValue: this.model,
+                        }
+                    }
                 },
                 {
                     opcode: 'setMaxTokens',
@@ -214,6 +220,25 @@ class Scratch3ChatGPTBlocks {
                     },
                 },
             ],
+            menus: {
+                chat_models: {
+                    acceptReporters: true,
+                    items: [
+                        {
+                            text: 'gpt-3.5-turbo',
+                            value: 'gpt-3.5-turbo',
+                        },
+                        {
+                            text: 'gpt-4-turbo',
+                            value: 'gpt-4-turbo',
+                        },
+                        {
+                            text: 'gpt-4o',
+                            value: 'gpt-4o',
+                        },
+                    ],
+                }
+            }
         };
     }
 
@@ -227,6 +252,7 @@ class Scratch3ChatGPTBlocks {
             return this._lastAnswer
         }
 
+        console.log(this.model);
         const questionMessageLog = { "role": "user", "content": question }
         const params = {
             method: 'POST',
@@ -235,7 +261,7 @@ class Scratch3ChatGPTBlocks {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: "gpt-3.5-turbo",
+                model: this.model,
                 messages: [
                     ...this.messageLogs, questionMessageLog
                 ],
@@ -269,9 +295,8 @@ class Scratch3ChatGPTBlocks {
         this._initMessageLog();
     }
 
-    setApiKey(args) {
-        this.apiKey = String(args.TEXT);
-        window.sessionStorage.setItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY, this.apiKey);
+    setModel(args) {
+        this.model = String(args.MODEL);
     }
 
     setMaxTokens(args) {
@@ -284,6 +309,11 @@ class Scratch3ChatGPTBlocks {
 
     setTimeout(args) {
         this.timeout = Number(args.NUMBER);
+    }
+
+    setApiKey(args) {
+        this.apiKey = String(args.TEXT);
+        window.sessionStorage.setItem(SESSION_STORAGE_KEY_CHATGPT_API_KEY, this.apiKey);
     }
 }
 
